@@ -2,9 +2,9 @@
 RECORD CHECK  -  my version
 ===========================
 
-Name  : priyahsh mishra
-Lane  :  AI 
-Date  : 11-10-26
+Name  : Priyansh Mishra
+Lane  :  AI
+Date  : 17.10.26
 
 Run it:   python template.py
 
@@ -13,84 +13,114 @@ Delete these instructions as you replace them with your code.
 """
 
 # =================================================================== FUNCTIONS
-# 1. Write a function called status_of(percent) that returns "OVER LIMIT"
-#    (100% or more), "WARNING" (90% or more), or "OK" (anything else).
-#
-#    Typical and above: also write check(value, limit) that returns the
-#    difference and the percentage as two values - do not print anything
-#    inside it, only calculate and return.
-#
-#    Excellent: also write print_report(label, value, limit, difference,
-#    percent, status) that does ALL of the printing below - nothing outside
-#    it should contain a print() of its own.
-#
-#    Give each function a one-line docstring saying what it does.
+# 1. Bring back check_record(value, limit) and print_report(...) from Week 3
+#    (copy them, or rewrite them - either is fine). check_record returns
+#    difference, percent and status. print_report does all of the printing,
+#    nothing outside it should contain a print() of its own. Give each a
+#    one-line docstring.
 
 # your function(s) go here
-def status_of(percent, warning_at=90):
-    """Return status based on percentage threshold."""
-    if percent >= 100:
-        return "OVER LIMIT"
-    elif percent >= warning_at:
-        return "WARNING"
-    else:
-        return "OK"
 
-def check(value, limit):
-    """Return difference and percentage for given value and limit."""
-    difference = value - limit
-    percent = (value / limit) * 100
-    return difference, percent
 
-def print_report(label, value, limit, difference, percent, status):
-    """Print the formatted record report."""
-    print()
-    print("=" * 34)
-    print(f"  RECORD CHECK  -  {label}")
-    print("=" * 34)
-    print(f"  Used        : {value:10.2f}")
-    print(f"  Total       : {limit:10.2f}")
-    print(f"  Difference  : {difference:10.2f}")
-    print(f"  Percent     : {percent:10.2f} %")
-    print(f"  Status      : {status:>10}")
-    print("=" * 34)
-
-# ==================================================================== INPUT
-# 2. Ask for your three values.
+# ====================================================================== STORE
+# 2. Get your records into a list of dicts, each shaped like:
+#        {"label": ..., "value": ..., "limit": ...}
 #
-#    - the first is TEXT      (a name, a hostname, an IP)  -> no conversion needed
-#    - the second is a NUMBER (use float(), not int())
-#    - the third  is a NUMBER (use float(), not int())
+#    Threshold : write the list directly in the code - at least 3 records.
+#    Typical   : instead, write a function load_records(path) that reads
+#                label,value,limit lines from a file and returns the list.
+#                Make your own data file, one record per line.
+#    Excellent : also write the results out to a new file (one line per
+#                record: label, status), as well as printing them.
 
-label = input("Enter label : ")
-value = float(input("Enter used amount: "))
-limit = float(input("Enter total limit: "))
+records = []   # replace with your code
 
 
-# ================================================================== PROCESS
-# 3. Work out the difference, the percentage, and the status.
+# =============================================================== PROCESS + OUTPUT
+# 3. Loop over records. For each one, call check_record and print_report.
 #
-#    Threshold : call status_of() to get the status. Work out the
-#                difference and percentage inline, not in a function.
-#    Typical   : call check() to get the difference and percentage instead.
+#    Excellent : also keep a running count of how many were OVER LIMIT, and
+#                print that once, after the loop ends.
 
-difference, percent = check(value, limit)
-status = status_of(percent)
-
-
-# =================================================================== OUTPUT
-# 4. Print the report.
-#
-#    Threshold : the three values you were given, plus status, inside a border
-#    Typical   : add difference and percent, 2 decimal places, right-aligned
-
-print_report(label, value, limit, difference, percent, status)
+# your loop goes here
 
 
 # ==========================================================================
-# 5. Before you finish:
+# 4. Before you finish:
 #
-#    [ ] Run it three times with different numbers
-#    [ ] Run it with a total of 0 and note the error (do not fix it yet)
-#    [ ] Check every function does one job - if a function both calculates
-#        and prints, split it
+#    [ ] Run it and check every record's numbers are correct by hand
+#    [ ] If you are loading from a file, check what happens when the file
+#        does not exist - write the error down
+#    [ ] Check every function still does one job
+def check_record(value, limit):
+    """Calculate the difference, percentage, and status for a given value and limit."""
+    diff = value - limit
+    percent = (value / limit) * 100
+    
+    if percent >= 100:
+        status = "OVER LIMIT"
+    elif percent >= 80:
+        status = "WARNING"
+    else:
+        status = "OK"
+        
+    return diff, percent, status
+
+
+def print_report(label, value, limit, diff, percent, status):
+    """Print a clean, formatted report line for a single record."""
+    print(f"{label} -> Value: {value} | Limit: {limit} | Diff: {diff:.1f} | Percent: {percent:.1f}% | Status: {status}")
+
+
+
+
+def load_records(path):
+    """Read label,value,limit lines from a file and return a list of dicts."""
+    records_list = []
+    with open(path) as f:
+        for line in f:
+            label, value, limit = line.strip().split(",")
+            records_list.append({
+                "label": label,
+                "value": float(value),
+                "limit": float(limit)
+            })
+    return records_list
+
+
+
+try:
+    records = load_records("it_records.txt")
+except FileNotFoundError:
+    print("Error: 'it_records.txt' could not be found. Starting with an empty list.")
+    records = []
+
+
+
+
+over_limit_count = 0
+results_lines = []
+
+for r in records:
+
+    diff, percent, status = check_record(r["value"], r["limit"])
+    
+
+    print_report(r["label"], r["value"], r["limit"], diff, percent, status)
+    
+    if status == "OVER LIMIT":
+        over_limit_count += 1
+        
+    results_lines.append(f"{r['label']},{status}")
+
+total_count = len(records)
+print("-" * 50)
+print(f"Summary: {over_limit_count} of {total_count} were over limit.")
+
+
+with open("results.txt", "w") as out_f:
+    for line in results_lines:
+        out_f.write(line + "\n")
+
+print("Results successfully written to 'results.txt'.")
+
