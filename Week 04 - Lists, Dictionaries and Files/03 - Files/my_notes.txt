@@ -1,0 +1,3 @@
+I am learning Python.
+This week we are working with files.
+Files can save information for later.
