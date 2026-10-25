@@ -2,9 +2,9 @@
 RECORD CHECK  -  my version
 ===========================
 
-Name  :
-Lane  :  AI / Cyber / IT      (delete two)
-Date  :
+Name  : Priyansh Mishra
+Lane  :  AI
+Date  : 17.10.26
 
 Run it:   python template.py
 
@@ -52,3 +52,75 @@ records = []   # replace with your code
 #    [ ] If you are loading from a file, check what happens when the file
 #        does not exist - write the error down
 #    [ ] Check every function still does one job
+def check_record(value, limit):
+    """Calculate the difference, percentage, and status for a given value and limit."""
+    diff = value - limit
+    percent = (value / limit) * 100
+    
+    if percent >= 100:
+        status = "OVER LIMIT"
+    elif percent >= 80:
+        status = "WARNING"
+    else:
+        status = "OK"
+        
+    return diff, percent, status
+
+
+def print_report(label, value, limit, diff, percent, status):
+    """Print a clean, formatted report line for a single record."""
+    print(f"{label} -> Value: {value} | Limit: {limit} | Diff: {diff:.1f} | Percent: {percent:.1f}% | Status: {status}")
+
+
+
+
+def load_records(path):
+    """Read label,value,limit lines from a file and return a list of dicts."""
+    records_list = []
+    with open(path) as f:
+        for line in f:
+            label, value, limit = line.strip().split(",")
+            records_list.append({
+                "label": label,
+                "value": float(value),
+                "limit": float(limit)
+            })
+    return records_list
+
+
+
+try:
+    records = load_records("it_records.txt")
+except FileNotFoundError:
+    print("Error: 'it_records.txt' could not be found. Starting with an empty list.")
+    records = []
+
+
+
+
+over_limit_count = 0
+results_lines = []
+
+for r in records:
+
+    diff, percent, status = check_record(r["value"], r["limit"])
+    
+
+    print_report(r["label"], r["value"], r["limit"], diff, percent, status)
+    
+    if status == "OVER LIMIT":
+        over_limit_count += 1
+        
+    results_lines.append(f"{r['label']},{status}")
+
+total_count = len(records)
+print("-" * 50)
+print(f"Summary: {over_limit_count} of {total_count} were over limit.")
+
+
+with open("results.txt", "w") as out_f:
+    for line in results_lines:
+        out_f.write(line + "\n")
+
+print("Results successfully written to 'results.txt'.")
+
